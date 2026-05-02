@@ -3,7 +3,6 @@ name: Build APK
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   build:
@@ -11,22 +10,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v4
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-
-      - name: Create Android project files
-        run: flutter create --platforms android .
+          node-version: 20
 
       - name: Install dependencies
-        run: flutter pub get
+        run: npm install
+
+      - uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build APK
-        run: flutter build apk --release --target-platform android-arm64
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: enat-ai
-          path: build/app/outputs/flutter-apk/app-release.apk
+        run: npx eas build --platform android --profile preview --non-interactive
